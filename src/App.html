@@ -1,0 +1,78 @@
+<section class="todoapp">
+	<header class="header">
+		<h1>todos</h1>
+		<input
+			on:keydown="maybeAddTodo(event)"
+			class="new-todo" placeholder="What needs to be done?" autofocus>
+	</header>
+	{#if $allTodos.size > 0}
+	<section class="main">
+		<input on:change="store.toggleAll()" id="toggle-all" class="toggle-all" type="checkbox">
+		<label for="toggle-all">Mark all as complete</label>
+		<ul class="todo-list">
+			{#each $visibleTodos as todo}
+			<li class={classnames({ completed: todo.completed, editing: todo.editing })}>
+				<div class="view">
+					<input on:change="store.toggleTodo(todo.id)" class="toggle" type="checkbox" checked={todo.completed}>
+					<label on:dblclick="store.toggleEditing(todo.id)">{todo.description}</label>
+					<button on:click="store.deleteTodo(todo.id)" class="destroy"></button>
+				</div>
+				<input
+					on:keydown="maybeToggleEditing(event, todo.id)"
+					on:input="store.updateTodoDescription(todo.id, this.value)"
+					class="edit" value={todo.description}>
+			</li>
+			{/each}
+		</ul>
+	</section>
+	{/if}
+	{#if $allTodos.size > 0}
+	<footer class="footer">
+		<span class="todo-count"><strong>{$remainingTodos.size}</strong> {#if $remainingTodos.size === 1}item{:else}items{/if} left</span>
+		<ul class="filters">
+			<li on:click="store.viewAll()">
+				<a class={classnames({ selected: $viewingAll })} href="#/">All</a>
+			</li>
+			<li on:click="store.viewActive()">
+				<a class={classnames({ selected: $viewingActive })} href="#/active">Active</a>
+			</li>
+			<li on:click="store.viewCompleted()">
+				<a class={classnames({ selected: $viewingCompleted })} href="#/completed">Completed</a>
+			</li>
+		</ul>
+		<!-- Hidden if no completed items are left ↓ -->
+		{#if $completedTodos.size > 0}
+		<button on:click="store.clearCompleted()"
+			class="clear-completed">Clear completed</button>
+		{/if}
+	</footer>
+	{/if}
+</section>
+<footer class="info">
+	<p>Double-click to edit a todo</p>
+	<p>Created by <a href="http://todomvc.com">Bradley J. Spaulding</a></p>
+	<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+</footer>
+
+<script>
+	import classnames from 'classnames';
+	export default {
+		helpers: {
+			classnames
+		},
+		methods: {
+			maybeAddTodo(event) {
+				if (event.keyCode === 13) {
+					this.store.addTodo(event.target.value);
+					event.target.value = '';
+				}
+			},
+
+			maybeToggleEditing(event, id) {
+				if (event.keyCode === 13) {
+					this.store.toggleEditing(id);
+				}
+			}
+		}
+	}
+</script>
